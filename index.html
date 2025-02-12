@@ -27,27 +27,19 @@
     <p id="result"></p>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', '超能力.txt', true);
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    const lines = xhr.responseText.split('\n').filter(line => line.trim()!== '');
-                    if (lines.length > 0) {
-                        const randomLineIndex = Math.floor(Math.random() * lines.length);
-                        const [power, sideEffect] = lines[randomLineIndex].split('副作用:');
-                        const resultElement = document.getElementById('result');
-                        resultElement.textContent = `超能力: ${power.trim()}\n副作用: ${sideEffect.trim()}`;
-                    } else {
-                        const resultElement = document.getElementById('result');
-                        resultElement.textContent = '文件中没有有效内容';
-                    }
-                } else {
+        document.addEventListener('DOMContentLoaded', async function () {
+            try {
+                const response = await fetch('get_power.php');
+                if (response.ok) {
+                    const data = await response.text();
                     const resultElement = document.getElementById('result');
-                    resultElement.textContent = '你没有获得超能力';
+                    resultElement.textContent = data;
+                } else {
+                    console.error('请求失败，状态码：', response.status);
                 }
-            };
-            xhr.send();
+            } catch (error) {
+                console.error('发生错误：', error);
+            }
         });
     </script>
 
