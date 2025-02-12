@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh - CN">
+
+<head>
+    <meta charset="UTF - 8">
+    <meta name="viewport" content="width=device - width, initial - scale = 1.0">
+    <title>随机超能力</title>
+    <style>
+        body {
+            font - family: Arial, sans - serif;
+            display: flex;
+            flex - direction: column;
+            justify - content: center;
+            align - items: center;
+            min - height: 100vh;
+            margin: 0;
+        }
+
+        p {
+            margin - top: 20px;
+            font - size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+    <p id="result"></p>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', '超能力.txt', true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const lines = xhr.responseText.split('\n').filter(line => line.trim()!== '');
+                    if (lines.length > 0) {
+                        const randomLineIndex = Math.floor(Math.random() * lines.length);
+                        const [power, sideEffect] = lines[randomLineIndex].split('副作用:');
+                        const resultElement = document.getElementById('result');
+                        resultElement.textContent = `超能力: ${power.trim()}\n副作用: ${sideEffect.trim()}`;
+                    } else {
+                        const resultElement = document.getElementById('result');
+                        resultElement.textContent = '文件中没有有效内容';
+                    }
+                } else {
+                    const resultElement = document.getElementById('result');
+                    resultElement.textContent = '你没有获得超能力';
+                }
+            };
+            xhr.send();
+        });
+    </script>
+
+</body>
+
+</html>
