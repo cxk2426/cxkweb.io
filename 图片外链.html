@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片的</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-image: url('https://fs-im-kefu.7moor-fs1.com/ly/4d2c3f00-7d4c-11e5-af15-41bf63ae4ea0/1734591713155/Image_1729705974323.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        button {
+            width: 90%; /* 调整按钮宽度为屏幕宽度的90%，适应手机屏幕 */
+            padding: 10px;
+            margin: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #homeButton {
+            width: 100px;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+       .img-button {
+            margin-top: 5px;
+            padding: 6px 10px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+       .img-button:hover {
+            background-color: #5a6268;
+        }
+
+       .iframe-container {
+            width: 90%; /* 调整iframe宽度为屏幕宽度的90% */
+            height: auto; /* 让高度自适应 */
+            border: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>图片和外链</h1>
+    <button id="homeButton">首页</button>
+    <button id="jumpButton1">跳转到图片多功能</button>
+    <button id="jumpButton2">跳转到图片外链</button>
+
+    <script>
+        const jumpButton1 = document.getElementById('jumpButton1');
+        const jumpButton2 = document.getElementById('jumpButton2');
+        const homeButton = document.getElementById('homeButton');
+
+        jumpButton1.addEventListener('click', function () {
+            const iframe = document.createElement('iframe');
+            iframe.className = "iframe-container";
+            iframe.src = 'https://api.hefollo.com/';
+            document.body.appendChild(iframe);
+
+            iframe.onload = function () {
+                const images = iframe.contentDocument.querySelectorAll('img');
+                images.forEach(img => {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.style.display = 'flex';
+                    imgContainer.style.flexDirection = 'column';
+                    imgContainer.style.alignItems = 'center';
+
+                    img.parentNode.insertBefore(imgContainer, img);
+                    imgContainer.appendChild(img);
+
+                    const copyLinkButton = document.createElement('button');
+                    copyLinkButton.textContent = "复制图片链接";
+                    copyLinkButton.className = "img-button";
+                    copyLinkButton.addEventListener('click', function () {
+                        navigator.clipboard.writeText(img.src).then(function () {
+                            alert('图片链接已复制到剪贴板！');
+                        }, function () {
+                            alert('复制链接失败，请稍后再试。');
+                        });
+                    });
+
+                    const fullScreenButton = document.createElement('button');
+                    fullScreenButton.textContent = "全屏看图";
+                    fullScreenButton.className = "img-button";
+                    fullScreenButton.addEventListener('click', function () {
+                        const newWindow = window.open(img.src, '_blank', 'width=device-width,height=device-height');
+                    });
+
+                    imgContainer.appendChild(copyLinkButton);
+                    imgContainer.appendChild(fullScreenButton);
+                });
+            };
+        });
+
+        jumpButton2.addEventListener('click', function () {
+            window.location.href = 'https://up.ly93.cc/';
+        });
+
+        homeButton.addEventListener('click', function () {
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+
+</html>
