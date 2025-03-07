@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐播放器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('http://sbtxqq.com/api/ytdm.php');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #musicPlayer {
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+        }
+
+        #songInfoSection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: transparent;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        #cover {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+
+        #backButton {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: transparent;
+            border: none;
+            font-size: 20px;
+            color: transparent;
+        }
+
+        #songDetails {
+            text-align: center;
+        }
+
+        #title {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        #singer {
+            font-size: 12px;
+            margin: 0;
+        }
+
+        audio {
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        #lyricBox {
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+            color: black;
+        }
+
+        input {
+            width: 120px;
+            margin-bottom: 5px;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+       .control-group {
+    display: flex;
+    align-items: center;
+}
+
+#randomPlaylistSelect {
+    width: 120px;
+    margin-left: 5px;
+    box-sizing: border-box;
+}
+
+button {
+    background-color: transparent;
+    color: #007BFF;
+    border: 1px solid #007BFF;
+    border-radius: 5px;
+    padding: 6px 12px;
+    margin-bottom: 5px;
+    font-size: 12px;
+    width: fit-content;
+}
+
+#deleteButton {
+    background-color: transparent;
+    color: #dc3545;
+    border: none;
+    border-radius: 0;
+    cursor: pointer;
+    /* 去除默认的文本左对齐 */
+    text-align: right; 
+    width: 120px; /* 和下拉框宽度保持一致 */
+    margin-top: 5px; /* 调整和下拉框的上下间距 */
+    /* 让按钮内的文字靠右显示 */
+    float: right; 
+}
+
+
+       .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 400px;
+            background-color: white;
+            border: 1px solid #888;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+       .modal-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+       .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            color: #333;
+        }
+
+       .close-modal-btn {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        #playlistModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #playlistModalContent {
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        #closePlaylistModalButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+
+        #playlist {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #randomPlayModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 400px;
+            background-color: white;
+            border: 1px solid #888;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+            z-index: 3;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        #randomPlayModalContent {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #artistInput {
+            width: 100%;
+            margin-bottom: 5px;
+            padding: 5px;
+            box-sizing: border-box;
+            placeholder: "用#隔开歌手名";
+        }
+
+        #closeRandomPlayModalButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            cursor: pointer;
+        }
+
+        #confirmRandomPlayButton {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="musicPlayer">
+        <div id="songInfoSection">
+            <img id="cover" alt="封面">
+            <button id="backButton" onclick="window.location.href='index.html'">&#8672;</button>
+            <div id="songDetails">
+                <h2 id="title"></h2>
+                <p id="singer">歌手: <span></span></p>
+            </div>
+        </div>
+        <audio id="audioPlayer" controls></audio>
+        <div class="control-group">
+            <input type="text" id="songNameInput" placeholder="输入歌名">
+            <button onclick="openPlaylistModal()">搜索音乐</button>
+            <button id="randomPlayButton" onclick="singleClickRandomPlay()" ondblclick="openRandomPlayModal()">随机播放</button>
+            <select id="randomPlaylistSelect" size="1" multiple>
+                <option>选择了0项</option>
+            </select>
+        </div>
+        <button id="deleteButton" onclick="deleteSelectedSong()">删除</button>
+        <div id="lyricBox">
+            <pre id="lrc"></pre>
+        </div>
+    </div>
+    <div id="announcementModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeAnnouncement">&times;</span>
+            <h2>公告</h2>
+            <p>本页面由浅夏编写，歌曲内容来源于网络，与作者无关，作者仅提供音乐播放器页面，弹窗关闭自动开始播放</p>
+            <button id="closeModalButton" class="close-modal-btn">谢谢您的使用！点击可关闭弹窗。</button>
+        </div>
+    </div>
+    <div id="playlistModal">
+        <div id="playlistModalContent">
+            <span id="closePlaylistModalButton">&times;</span>
+            <h2>歌单列表</h2>
+            <ul id="playlist"></ul>
+        </div>
+    </div>
+    <div id="randomPlayModal">
+        <div id="randomPlayModalContent">
+            <span id="closeRandomPlayModalButton">&times;</span>
+            <h2>随机播放设置</h2>
+            <input type="text" id="artistInput" placeholder="请输入歌手，多个用#隔开" />
+            <button id="confirmRandomPlayButton" onclick="confirmRandomPlaySettings()">确定</button>
+        </div>
+    </div>
+    <script>
+        const audioPlayer = document.getElementById('audioPlayer');
+        const titleElement = document.getElementById('title');
+        const singerElement = document.getElementById('singer').querySelector('span');
+        const coverElement = document.getElementById('cover');
+        const lrcElement = document.getElementById('lrc');
+        const announcementModal = document.getElementById('announcementModal');
+        const closeAnnouncement = document.getElementById('closeAnnouncement');
+        const playlistModal = document.getElementById('playlistModal');
+        const closePlaylistModalButton = document.getElementById('closePlaylistModalButton');
+        const playlistElement = document.getElementById('playlist');
+        const randomPlaylistSelect = document.getElementById('randomPlaylistSelect');
+        const randomPlayModal = document.getElementById('randomPlayModal');
+        const closeRandomPlayModalButton = document.getElementById('closeRandomPlayModalButton');
+        const artistInput = document.getElementById('artistInput');
+        const confirmRandomPlayButton = document.getElementById('confirmRandomPlayButton');
+        const deleteButton = document.getElementById('deleteButton');
+
+        let preloadedAudio;
+        let currentSongIndex = 0;
+        let randomSongs = [];
+        let selectedArtists = [];
+
+        function fetchMusicDataAndStore(isManual) {
+            const songName = document.getElementById('songNameInput').value;
+            const apiUrl = `https://www.hhlqilongzhu.cn/api/joox/?msg=${encodeURIComponent(songName)}&n=1&type=json`;
+            fetch(apiUrl)
+               .then(res => res.json())
+               .then(data => {
+                    localStorage.setItem('musicData', JSON.stringify(data));
+                    console.log('数据已存储到localStorage');
+                    if (isManual) {
+                        alert('搜索歌曲成功！');
+                    }
+                    addSongToRandomPlaylist(data.data);
+                })
+               .catch(error => console.error('获取音乐数据失败:', error));
+        }
+
+        function addSongToRandomPlaylist(songData) {
+            const existingSong = randomSongs.find(song => song.title === songData.title && song.singer === songData.singer);
+            if (!existingSong) {
+                randomSongs.push({
+                    title: songData.title,
+                    singer: songData.singer,
+                    index: 1
+                });
+                updateRandomPlaylistSelect();
+            }
+        }
+
+        function updateRandomPlaylistSelect() {
+            randomPlaylistSelect.innerHTML = '';
+            if (randomSongs.length === 0) {
+                const option = document.createElement('option');
+                option.textContent = '选择了0项';
+                randomPlaylistSelect.appendChild(option);
+            } else {
+                randomSongs.forEach((song, index) => {
+                    const option = document.createElement('option');
+                    option.value = `${index + 1}. ${song.title} -- ${song.singer}`;
+                    option.textContent = `${index + 1}. ${song.title} -- ${song.singer}`;
+                    option.dataset.index = index;
+                    option.addEventListener('click', () => playSongFromSelect(index));
+                    randomPlaylistSelect.appendChild(option);
+                });
+            }
+            // 根据选择项数量调整下拉框高度
+            if (randomSongs.length === 0) {
+                randomPlaylistSelect.style.height = '20px';
+            } else {
+                randomPlaylistSelect.style.height = '40px';
+            }
+        }
+
+        function playMusicAndUpdateDetails(isManual) {
+            const musicData = JSON.parse(localStorage.getItem('musicData'));
+            if (musicData) {
+                const { music_url, cover, title, singer, lrc } = musicData.data;
+                if (!preloadedAudio) {
+                    preloadedAudio = new Audio(music_url);
+                    preloadedAudio.oncanplaythrough = () => {
+                        audioPlayer.src = music_url;
+                        audioPlayer.play();
+                        coverElement.src = cover;
+                        titleElement.textContent = title;
+                        singerElement.textContent = singer;
+                        lrcElement.innerHTML = lrc.split('\n').map(line => `<p>${line.trim()}</p>`).join('');
+                        if (isManual) {
+                            alert('播放成功！');
+                        }
+                        addSongToRandomPlaylist(musicData.data);
+                    };
+                    preloadedAudio.onerror = () => console.error('音频加载错误');
+                    preloadedAudio.load();
+                } else {
+                    audioPlayer.src = music_url;
+                    audioPlayer.play();
+                    coverElement.src = cover;
+                    titleElement.textContent = title;
+                    singerElement.textContent = singer;
+                    lrcElement.innerHTML = lrc.split('\n').map(line => `<p>${line.trim()}</p>`).join('');
+                    if (isManual) {
+                        alert('播放成功！');
+                    }
+                    addSongToRandomPlaylist(musicData.data);
+                }
+            } else {
+                console.error('未获取到音乐数据，请先获取并存储数据');
+            }
+        }
+
+        function fetchMusicData() {
+            const musicData = JSON.parse(localStorage.getItem('musicData'));
+            if (musicData) {
+                const { cover, title, singer, lrc } = musicData.data;
+                coverElement.src = cover;
+                titleElement.textContent = title;
+                singerElement.textContent = singer;
+                lrcElement.innerHTML = lrc.split('\n').map(line => `<p>${line.trim()}</p>`).join('');
+            } else {
+                console.error('未获取到音乐数据，请先获取并存储数据');
+            }
+        }
+
+        window.onload = () => {
+            document.getElementById('songNameInput').value = '晴';
+            fetchMusicDataAndStore(false);
+            setTimeout(() => {
+                fetchMusicData();
+                playMusicAndUpdateDetails(false);
+            }, 1000);
+
+            closeAnnouncement.addEventListener('click', closeAnnouncementModal);
+            document.getElementById('closeModalButton').addEventListener('click', closeAnnouncementModal);
+            announcementModal.style.display = 'block';
+
+            closePlaylistModalButton.addEventListener('click', closePlaylistModal);
+            playlistModal.style.display = 'none';
+
+            closeRandomPlayModalButton.addEventListener('click', closeRandomPlayModal);
+            randomPlayModal.style.display = 'none';
+
+            window.addEventListener('click', e => {
+                if (e.target === announcementModal) closeAnnouncementModal();
+                if (e.target === playlistModal) closePlaylistModal();
+                if (e.target === randomPlayModal) closeRandomPlayModal();
+            });
+
+            audioPlayer.addEventListener('ended', playNextSong);
+        };
+
+        function closeAnnouncementModal() {
+            announcementModal.style.display = 'none';
+            playMusicAndUpdateDetails(false);
+        }
+
+        function openPlaylistModal() {
+            const promptModal = document.createElement('div');
+            promptModal.style.position = 'fixed';
+            promptModal.style.top = '50%';
+            promptModal.style.left = '50%';
+            promptModal.style.transform = 'translate(-50%, -50%)';
+            promptModal.style.backgroundColor = 'white';
+            promptModal.style.padding = '20px';
+            promptModal.style.border = '1px solid #888';
+            promptModal.style.boxShadow = '0 4px 8px 0 rgba(0, 0, 0, 0.2)';
+            promptModal.style.zIndex = 999;
+            promptModal.style.borderRadius = '10px';
+            promptModal.textContent = '点击对应序号歌曲，播放音乐';
+
+            const closePrompt = document.createElement('span');
+            closePrompt.style.position = 'absolute';
+            closePrompt.style.top = '10px';
+            closePrompt.style.right = '10px';
+            closePrompt.style.cursor = 'pointer';
+            closePrompt.textContent = '×';
+            closePrompt.addEventListener('click', () => {
+                document.body.removeChild(promptModal);
+                const songName = document.getElementById('songNameInput').value;
+                const apiUrl = `https://www.hhlqilongzhu.cn/api/joox/?msg=${encodeURIComponent(songName)}`;
+                fetch(apiUrl)
+                   .then(res => res.text())
+                   .then(data => {
+                        const lines = data.split('\n').filter(line => line.trim()!== '');
+                        playlistElement.innerHTML = '';
+                        lines.forEach(line => {
+                            const parts = line.match(/(\d+)\、(.*?) -- (.*)/);
+                            if (parts && parts.length === 4) {
+                                const listItem = document.createElement('li');
+                                listItem.textContent = `${parts[2]} -- ${parts[3]}`;
+                                listItem.addEventListener('click', function () {
+                                    const [title, singer] = this.textContent.split(' -- ');
+                                    document.getElementById('songNameInput').value = title;
+                                    closePlaylistModal();
+                                    fetchMusicDataAndStore(true);
+                                    setTimeout(() => {
+                                        fetchMusicData();
+                                        playMusicAndUpdateDetails(true);
+                                    }, 1000);
+                                });
+                                playlistElement.appendChild(listItem);
+                            }
+                        });
+                        playlistModal.style.display = 'block';
+                    })
+                   .catch(error => console.error('获取歌单数据失败:', error));
+            });
+            promptModal.appendChild(closePrompt);
+            document.body.appendChild(promptModal);
+        }
+
+        function closePlaylistModal() {
+            playlistModal.style.display = 'none';
+        }
+
+        function openRandomPlayModal() {
+            randomPlayModal.style.display = 'block';
+            artistInput.value = '';
+        }
+
+        function closeRandomPlayModal() {
+            randomPlayModal.style.display = 'none';
+        }
+
+        function confirmRandomPlaySettings() {
+            selectedArtists = artistInput.value.split('#').map(artist => artist.trim()).filter(artist => artist!== '');
+            closeRandomPlayModal();
+            showRandomPlaylist();
+        }
+
+        function deleteSelectedSong() {
+            const selectedOptions = randomPlaylistSelect.selectedOptions;
+            const selectedIndices = [];
+            for (let i = 0; i < selectedOptions.length; i++) {
+                selectedIndices.push(parseInt(selectedOptions[i].dataset.index));
+            }
+            // 倒序删除，避免索引错乱
+            selectedIndices.sort((a, b) => b - a);
+            for (let i = 0; i < selectedIndices.length; i++) {
+                const index = selectedIndices[i];
+                randomSongs.splice(index, 1);
+            }
+            updateRandomPlaylistSelect();
+            // 调整当前歌曲索引
+            let newIndex = currentSongIndex;
+            for (let i = 0; i < selectedIndices.length; i++) {
+                const index = selectedIndices[i];
+                if (newIndex >= index) {
+                    newIndex--;
+                }
+            }
+            currentSongIndex = newIndex;
+            if (currentSongIndex < 0) {
+                currentSongIndex = 0;
+            }
+            if (randomSongs.length === 0) {
+                audioPlayer.pause();
+                audioPlayer.currentTime = 0;
+                titleElement.textContent = '';
+                singerElement.textContent = '';
+                coverElement.src = '';
+                lrcElement.innerHTML = '';
+            } else if (currentSongIndex < randomSongs.length) {
+                playSongFromSelect(currentSongIndex);
+            }
+        }
+
+        function getRandomSongs() {
+            const artistRequests = selectedArtists.map(artist =>
+                fetch(`https://www.hhlqilongzhu.cn/api/joox/?msg=${encodeURIComponent(artist)}`)
+                   .then(res => res.text())
+                   .then(data =>
+                        data.split('\n').filter(line => line.trim()!== '').map(line => {
+                            const parts = line.match(/(\d+)\、(.*?) -- (.*)/);
+                            return parts && parts.length === 4? {
+                                title: parts[2],
+                                singer: parts[3],
+                                index: 1
+                            } : null;
+                        }).filter(Boolean)
+                )
+            );
+
+            return Promise.all(artistRequests)
+               .then(resultsArray => {
+                    const allSongs = [].concat(...resultsArray);
+                    randomSongs = allSongs.filter(song => song!== null);
+                    updateRandomPlaylistSelect();
+                    if (randomSongs.length > 0) {
+                        playSongFromSelect(0);
+                    } else {
+                        console.error('未获取到符合条件的歌曲');
+                    }
+                })
+               .catch(error => console.error('获取随机歌曲列表失败:', error));
+        }
+
+        function playSongFromSelect(index) {
+            currentSongIndex = index;
+            const song = randomSongs[index];
+            document.getElementById('songNameInput').value = song.title;
+            fetchMusicDataAndStore(false);
+            setTimeout(() => {
+                fetchMusicData();
+                playMusicAndUpdateDetails(false);
+            }, 1000);
+        }
+
+        function playNextSong() {
+            currentSongIndex++;
+            if (currentSongIndex < randomSongs.length) {
+                playSongFromSelect(currentSongIndex);
+            } else {
+                currentSongIndex = 0;
+                showRandomPlaylist();
+            }
+        }
+
+        function showRandomPlaylist() {
+            getRandomSongs();
+        }
+
+        function singleClickRandomPlay() {
+            if (randomSongs.length > 0) {
+                const randomIndex = Math.floor(Math.random() * randomSongs.length);
+                while (randomIndex === currentSongIndex) {
+                    randomIndex = Math.floor(Math.random() * randomSongs.length);
+                }
+                currentSongIndex = randomIndex;
+                const song = randomSongs[randomIndex];
+                document.getElementById('songNameInput').value = song.title;
+                fetchMusicDataAndStore(false);
+                setTimeout(() => {
+                    fetchMusicData();
+                    playMusicAndUpdateDetails(false);
+                }, 1000);
+            } else {
+                console.error('还未设置随机播放歌曲，请先设置');
+            }
+        }
+    </script>
+</body>
+
+</html>
